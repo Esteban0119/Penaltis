@@ -1,54 +1,130 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Predicción de Penaltis</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.20.0/dist/tf.min.js"></script>
+<meta charset="UTF-8">
+<title>Predicción de Penaltis</title>
+
+<style>
+body {
+    background: #121212;
+    color: white;
+    font-family: Arial;
+    padding: 20px;
+}
+.container {
+    max-width: 500px;
+    margin: auto;
+    background: #1e1e1e;
+    padding: 25px;
+    border-radius: 12px;
+}
+label { font-weight: bold; margin-top: 10px; display:block; }
+input, select {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+    background: #2c2c2c;
+    color: white;
+    border: 1px solid #444;
+    border-radius: 6px;
+}
+button {
+    width: 100%;
+    padding: 10px;
+    margin-top: 15px;
+    background: #0078ff;
+    color: white;
+    border: none;
+    border-radius: 8px;
+}
+#resultado {
+    margin-top: 20px;
+    font-size: 22px;
+    font-weight: bold;
+    text-align: center;
+}
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.19.0/dist/tf.min.js"></script>
 </head>
+
 <body>
+<div class="container">
+<h2>Predicción de Gol en Penalti</h2>
 
-    <div class="container">
-        <h1>⚽ Predicción de Penaltis</h1>
+<label>Velocidad (km/h) — Rango sugerido: 60 - 140</label>
+<input type="number" id="vel" min="60" max="140">
 
-        <div class="input-group">
-            <label>Velocidad (km/h)(60-140)</label>
-            <input type="number" id="velocidad" min="60" max="140">
-        </div>
+<label>Ángulo (grados) — Rango sugerido: 0 - 60</label>
+<input type="number" id="angle" min="0" max="60">
 
-        <div class="input-group">
-            <label>Ángulo (grados)(0-60)</label>
-            <input type="number" id="angulo" min="0" max="60">
-        </div>
+<label>Distancia Portero (m) — Rango sugerido: 0.3 - 1.5</label>
+<input type="number" id="dist" step="0.01" min="0.3" max="1.5">
 
-        <div class="input-group">
-            <label>Distancia al Portero (m)(0.3-2)</label>
-            <input type="number" id="distancia" min="0.3" max="2" step="0.1">
-        </div>
+<label>Presión del partido</label>
+<select id="presion">
+    <option value="Baja">Baja</option>
+    <option value="Media">Media</option>
+    <option value="Alta">Alta</option>
+</select>
 
-        <div class="input-group">
-            <label>Presión del Partido</label>
-            <select id="presion">
-                <option value="Alta">Alta</option>
-                <option value="Media">Media</option>
-                <option value="Baja">Baja</option>
-            </select>
-        </div>
+<label>Pie Dominante</label>
+<select id="pie">
+    <option value="Derecho">Derecho</option>
+    <option value="Izquierdo">Izquierdo</option>
+</select>
 
-        <div class="input-group">
-            <label>Pie Dominante</label>
-            <select id="pie">
-                <option value="Derecho">Derecho</option>
-                <option value="Izquierdo">Izquierdo</option>
-            </select>
-        </div>
+<button onclick="predecir()">Predecir</button>
 
-        <button onclick="predecir()">Predecir Penalti</button>
+<div id="resultado"></div>
+</div>
 
-        <div id="resultado"></div>
-    </div>
+<script>
+let model;
 
-    <script src="app.js"></script>
+async function loadModel() {
+    model = await tf.loadLayersModel("model.json");
+    console.log("Modelo cargado");
+}
+loadModel();
+
+function predecir() {
+
+    let vel = Number(document.getElementById("vel").value);
+    let angle = Number(document.getElementById("angle").value);
+    let dist = Number(document.getElementById("dist").value);
+    let pres = document.getElementById("presion").value;
+    let pie = document.getElementById("pie").value;
+
+    let p_baja = pres === "Baja" ? 1 : 0;
+    let p_media = pres === "Media" ? 1 : 0;
+    let p_alta = pres === "Alta" ? 1 : 0;
+
+    let pie_der = pie === "Derecho" ? 1 : 0;
+    let pie_izq = pie === "Izquierdo" ? 1 : 0;
+
+    const input = tf.tensor2d([[ 
+        vel, angle, dist,
+        p_baja, p_media, p_alta,
+        pie_der, pie_izq
+    ]]);
+
+    let pred = model.predict(input);
+    pred.array().then(p => {
+
+        let prob = p[0][0];
+
+        if (prob >= 0.5) {
+            document.getElementById("resultado").innerHTML =
+                "✅ <span style='color:#4CAF50'>Gol probable (" + (prob*100).toFixed(1) + "%)</span>";
+        } else {
+            document.getElementById("resultado").innerHTML =
+                "❌ <span style='color:#ff5252'>Fallo probable (" + (prob*100).toFixed(1) + "%)</span>";
+        }
+    });
+}
+</script>
+
 </body>
 </html>
+
