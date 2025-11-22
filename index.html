@@ -80,7 +80,7 @@ let model;
 
 async function cargarModelo() {
     try {
-        model = await tf.loadLayersModel("model.json");
+        model = await tf.loadLayersModel("https://raw.githubusercontent.com/Esteban0119/Penaltis/refs/heads/main/model.json");
         console.log("Modelo cargado correctamente");
     } catch (error) {
         console.error("Error al cargar modelo:", error);
@@ -128,9 +128,6 @@ function predecirPenalti() {
     });
 }
 </script>
-
-</body>
-</html>
 
 </body>
 </html>
