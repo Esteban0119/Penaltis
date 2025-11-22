@@ -1,62 +1,54 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Predicción Penaltis</title>
-
-  <link rel="stylesheet" href="style.css">
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.19.0/dist/tf.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Predicción de Penaltis</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.20.0/dist/tf.min.js"></script>
 </head>
 <body>
-  <main class="card">
-    <h1>Predicción de Penaltis</h1>
-    <p class="sub">Modelo cargado desde el repositorio. Ingresa valores dentro de los rangos y pulsa <strong>Predecir</strong>.</p>
 
-    <div class="form-row">
-      <label>Velocidad (km/h) <small>(70–115)</small></label>
-      <input id="vel" type="number" placeholder="e.g. 90">
+    <div class="container">
+        <h1>⚽ Predicción de Penaltis</h1>
+
+        <div class="input-group">
+            <label>Velocidad (km/h)</label>
+            <input type="number" id="velocidad" min="60" max="140">
+        </div>
+
+        <div class="input-group">
+            <label>Ángulo (grados)</label>
+            <input type="number" id="angulo" min="0" max="60">
+        </div>
+
+        <div class="input-group">
+            <label>Distancia al Portero (m)</label>
+            <input type="number" id="distancia" min="0.3" max="2" step="0.1">
+        </div>
+
+        <div class="input-group">
+            <label>Presión del Partido</label>
+            <select id="presion">
+                <option value="Alta">Alta</option>
+                <option value="Media">Media</option>
+                <option value="Baja">Baja</option>
+            </select>
+        </div>
+
+        <div class="input-group">
+            <label>Pie Dominante</label>
+            <select id="pie">
+                <option value="Derecho">Derecho</option>
+                <option value="Izquierdo">Izquierdo</option>
+            </select>
+        </div>
+
+        <button onclick="predecir()">Predecir Penalti</button>
+
+        <div id="resultado"></div>
     </div>
 
-    <div class="form-row">
-      <label>Ángulo (grados) <small>(5–45)</small></label>
-      <input id="ang" type="number" placeholder="e.g. 25">
-    </div>
-
-    <div class="form-row">
-      <label>Distancia Portero (m) <small>(0.4–1.2)</small></label>
-      <input id="dist" type="number" step="0.01" placeholder="e.g. 0.8">
-    </div>
-
-    <div class="form-row">
-      <label>Presión del partido</label>
-      <select id="presion">
-        <option value="Baja">Baja</option>
-        <option value="Media" selected>Media</option>
-        <option value="Alta">Alta</option>
-      </select>
-    </div>
-
-    <div class="form-row">
-      <label>Pie dominante</label>
-      <select id="pie">
-        <option value="Derecho" selected>Derecho</option>
-        <option value="Izquierdo">Izquierdo</option>
-      </select>
-    </div>
-
-    <div class="actions">
-      <button id="predictBtn">Predecir Penalti</button>
-    </div>
-
-    <div id="message" class="message"></div>
-    <div id="result" class="result"></div>
-
-    <footer>
-      <small>Para publicar: sube <code>model.json</code>, los archivos <code>.bin</code> y <code>penaltis_meta.json</code> al mismo directorio que esta página.</small>
-    </footer>
-  </main>
-
-  <script src="script.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>
