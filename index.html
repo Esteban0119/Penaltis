@@ -1,114 +1,62 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<title>Predicción Penaltis</title>
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.2.0"></script>
-<style>
-    body {
-        background: #1a1a1a;
-        color: white;
-        font-family: Arial;
-        text-align: center;
-        padding: 30px;
-    }
-    .box {
-        background: #222;
-        padding: 25px;
-        border-radius: 12px;
-        width: 400px;
-        margin: auto;
-        box-shadow: 0px 0px 15px #000;
-    }
-    input {
-        width: 90%;
-        padding: 10px;
-        margin: 10px;
-        border-radius: 6px;
-        border: none;
-    }
-    button {
-        padding: 12px 18px;
-        background: dodgerblue;
-        border: none;
-        color: white;
-        border-radius: 8px;
-        cursor: pointer;
-        font-size: 16px;
-    }
-    button:hover {
-        background: deepskyblue;
-    }
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Predicción Penaltis</title>
+
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.19.0/dist/tf.min.js"></script>
 </head>
 <body>
+  <main class="card">
+    <h1>Predicción de Penaltis</h1>
+    <p class="sub">Modelo cargado desde el repositorio. Ingresa valores dentro de los rangos y pulsa <strong>Predecir</strong>.</p>
 
-<h1>Predicción de Penaltis (Gol o Fallado)</h1>
+    <div class="form-row">
+      <label>Velocidad (km/h) <small>(70–115)</small></label>
+      <input id="vel" type="number" placeholder="e.g. 90">
+    </div>
 
-<div class="box">
+    <div class="form-row">
+      <label>Ángulo (grados) <small>(5–45)</small></label>
+      <input id="ang" type="number" placeholder="e.g. 25">
+    </div>
 
-    <label>Velocidad (70 - 115 km/h)</label><br>
-    <input id="velocidad" type="number"><br>
+    <div class="form-row">
+      <label>Distancia Portero (m) <small>(0.4–1.2)</small></label>
+      <input id="dist" type="number" step="0.01" placeholder="e.g. 0.8">
+    </div>
 
-    <label>Ángulo (5 - 45 grados)</label><br>
-    <input id="angulo" type="number"><br>
+    <div class="form-row">
+      <label>Presión del partido</label>
+      <select id="presion">
+        <option value="Baja">Baja</option>
+        <option value="Media" selected>Media</option>
+        <option value="Alta">Alta</option>
+      </select>
+    </div>
 
-    <label>Distancia Portero (0.4 - 1.2 m)</label><br>
-    <input id="distancia" type="number"><br>
+    <div class="form-row">
+      <label>Pie dominante</label>
+      <select id="pie">
+        <option value="Derecho" selected>Derecho</option>
+        <option value="Izquierdo">Izquierdo</option>
+      </select>
+    </div>
 
-    <button onclick="predecir()">Predecir Penalti</button>
+    <div class="actions">
+      <button id="predictBtn">Predecir Penalti</button>
+    </div>
 
-    <h2 id="resultado"></h2>
-</div>
+    <div id="message" class="message"></div>
+    <div id="result" class="result"></div>
 
-<script>
+    <footer>
+      <small>Para publicar: sube <code>model.json</code>, los archivos <code>.bin</code> y <code>penaltis_meta.json</code> al mismo directorio que esta página.</small>
+    </footer>
+  </main>
 
-let model;
-
-async function cargarModelo() {
-    model = await tf.loadLayersModel("model.json");
-    console.log("Modelo cargado correctamente");
-}
-
-cargarModelo();
-
-function predecir() {
-
-    let v = parseFloat(document.getElementById("velocidad").value);
-    let a = parseFloat(document.getElementById("angulo").value);
-    let d = parseFloat(document.getElementById("distancia").value);
-
-    // RANGOS
-    if (v < 70 || v > 115) {
-        alert("La velocidad debe estar entre 70 y 115");
-        return;
-    }
-    if (a < 5 || a > 45) {
-        alert("El ángulo debe estar entre 5 y 45 grados");
-        return;
-    }
-    if (d < 0.4 || d > 1.2) {
-        alert("La distancia debe estar entre 0.4 y 1.2 metros");
-        return;
-    }
-
-    // Normalizar → LO MISMO DEL SCALER DE SKLEARN
-    let input = tf.tensor2d([[v, a, d]]);
-
-    model.predict(input).array().then(pred => {
-        let prob = pred[0][0];
-        let res = document.getElementById("resultado");
-
-        if (prob >= 0.5) {
-            res.innerHTML = "GOL ⚽ (" + Math.round(prob * 100) + "%)";
-            res.style.color = "lime";
-        } else {
-            res.innerHTML = "FALLADO ❌ (" + Math.round((1 - prob) * 100) + "%)";
-            res.style.color = "red";
-        }
-    });
-}
-</script>
-
+  <script src="script.js"></script>
 </body>
 </html>
